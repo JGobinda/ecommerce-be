@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
-from spark.commons.models import FileUpload
-from spark.commons.serializers import DynamicFieldsModelSerializer
+from ecommerce.commons.models import FileUpload
+from ecommerce.commons.serializers import DynamicFieldsModelSerializer
 
 
 class FileUploadSerializer(DynamicFieldsModelSerializer):

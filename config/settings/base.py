@@ -14,7 +14,8 @@ INSTALLED_APPS = [
 
 THIRD_PARTY_APPS = [
     'rest_framework',
-    'cuser'
+    'cuser',
+    'rest_framework_swagger'
 ]
 
 LOCAL_APPS = [
@@ -75,7 +76,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
@@ -96,3 +96,35 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+    # 'DEFAULT_PAGINATION_CLASS': 'bastakotilab.commons.pagination.LimitZeroNoResultsPagination',
+    # 'PAGE_SIZE': 80,
+    # 'DEFAULT_FILTER_BACKENDS': (
+    #     'django_filters.rest_framework.DjangoFilterBackend',
+    # ),
+    'EXCEPTION_HANDLER': 'bastakotilab.commons.exception_handler.handle',
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.BrowsableAPIRenderer',
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.CoreJSONRenderer',
+        'rest_framework_swagger.renderers.SwaggerUIRenderer',
+        'rest_framework_swagger.renderers.OpenAPIRenderer',
+    )
+}
+
+LOGIN_URL = 'rest_framework:login'
+LOGOUT_URL = 'rest_framework:logout'
+LOGIN_REDIRECT_URL = '/api/root/'
+LOGOUT_REDIRECT_URL = '/api/root/'
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'api_key': {
+            'type': 'apiKey',
+            'in': 'header',
+            'name': 'Authorization'
+        }
+    },
+}

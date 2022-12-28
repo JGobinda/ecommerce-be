@@ -4,7 +4,7 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.response import Response
 
-from spark.commons.api.v1.serializers.file_upload import FileUploadSerializer
+from ecommerce.commons.api.v1.serializers.file_upload import FileUploadSerializer
 
 
 class FileViewSet(GenericViewSet):

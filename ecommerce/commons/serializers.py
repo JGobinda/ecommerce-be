@@ -4,7 +4,7 @@ from django.utils.functional import cached_property
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
-from spark.commons.models import CuserModel
+from ecommerce.commons.models import CuserModel
 
 
 class DynamicFieldsModelSerializer(ModelSerializer):
