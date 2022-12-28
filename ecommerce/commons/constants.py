@@ -1,0 +1,56 @@
+ADMIN = "Admin"
+CREATOR = "Creator"
+USER = "User"
+
+MALE = 'MALE'
+FEMALE = 'FEMALE'
+OTHERS = 'OTHERS'
+
+GENDER_CHOICES = (
+    (MALE, 'MALE'),
+    (FEMALE, 'FEMALE'),
+    (OTHERS, 'OTHERS'),
+)
+
+SCHOOL = 'SCHOOL'
+HIGH_SCHOOL = 'HIGH_SCHOOL'
+UNIVERSITY = 'UNIVERSITY'
+
+GRADE_CHOICES = (
+    (SCHOOL, 'SCHOOL'),
+    (HIGH_SCHOOL, 'HIGH_SCHOOL'),
+    (UNIVERSITY, 'UNIVERSITY')
+)
+
+ARTICLE = 'Article'
+VIDEO = 'Video'
+QUIZ = 'Quiz'
+
+LESSON_CHOICES = (
+    (ARTICLE, 'Article'),
+    (VIDEO, 'Video'),
+    (QUIZ, 'Quiz'),
+)
+
+CONTENT_CATEGORY_CHOICES = (
+    (VIDEO, 'Video'),
+    (ARTICLE, 'Article'),
+)
+
+ACTIVE = "ACTIVE"
+INACTIVE = "INACTIVE"
+DRAFT = "DRAFT"
+
+CONTENT_STATUS = (
+    (DRAFT, "DRAFT"),
+    (ACTIVE, 'ACTIVE'),
+    (INACTIVE, 'INACTIVE'),
+)
+
+MP4 = 'mp4'
+JSON = 'json'
+
+MEDIA_TYPES_CHOICES = (
+    (MP4, 'mp4'),
+    (JSON, 'json'),
+)
