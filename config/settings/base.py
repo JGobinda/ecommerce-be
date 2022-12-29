@@ -15,12 +15,14 @@ INSTALLED_APPS = [
 THIRD_PARTY_APPS = [
     'rest_framework',
     'cuser',
-    'rest_framework_swagger'
+    'rest_framework_swagger',
+    'debug_toolbar',
 ]
 
 LOCAL_APPS = [
     'ecommerce.accounts',
-    'ecommerce.commons'
+    'ecommerce.commons',
+    'ecommerce.contact'
 ]
 
 INSTALLED_APPS += THIRD_PARTY_APPS + LOCAL_APPS
@@ -34,6 +36,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'cuser.middleware.CuserMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 
 ]
 
