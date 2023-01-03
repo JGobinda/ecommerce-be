@@ -94,6 +94,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
+MEDIA_URL = '/media/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -102,19 +103,19 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
-    # 'DEFAULT_PAGINATION_CLASS': 'bastakotilab.commons.pagination.LimitZeroNoResultsPagination',
+    # 'DEFAULT_PAGINATION_CLASS': 'ecommerce.commons.pagination.LimitZeroNoResultsPagination',
     # 'PAGE_SIZE': 80,
     # 'DEFAULT_FILTER_BACKENDS': (
     #     'django_filters.rest_framework.DjangoFilterBackend',
     # ),
     'EXCEPTION_HANDLER': 'bastakotilab.commons.exception_handler.handle',
-    'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework.renderers.BrowsableAPIRenderer',
-        'rest_framework.renderers.JSONRenderer',
-        'rest_framework.renderers.CoreJSONRenderer',
-        'rest_framework_swagger.renderers.SwaggerUIRenderer',
-        'rest_framework_swagger.renderers.OpenAPIRenderer',
-    )
+    # 'DEFAULT_RENDERER_CLASSES': (
+    #     'rest_framework.renderers.BrowsableAPIRenderer',
+    #     'rest_framework.renderers.JSONRenderer',
+    #     'rest_framework.renderers.CoreJSONRenderer',
+    #     'rest_framework_swagger.renderers.SwaggerUIRenderer',
+    #     'rest_framework_swagger.renderers.OpenAPIRenderer',
+    # )
 }
 
 LOGIN_URL = 'rest_framework:login'
