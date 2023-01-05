@@ -17,12 +17,15 @@ THIRD_PARTY_APPS = [
     'cuser',
     'rest_framework_swagger',
     'debug_toolbar',
+    'knox',
+    'django_extensions',
 ]
 
 LOCAL_APPS = [
     'ecommerce.accounts',
     'ecommerce.commons',
-    'ecommerce.contact'
+    'ecommerce.contact',
+    'ecommerce.authentication'
 ]
 
 INSTALLED_APPS += THIRD_PARTY_APPS + LOCAL_APPS
@@ -102,13 +105,14 @@ MEDIA_URL = '/media/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
-    # 'DEFAULT_PAGINATION_CLASS': 'ecommerce.commons.pagination.LimitZeroNoResultsPagination',
-    # 'PAGE_SIZE': 80,
+    'DEFAULT_PAGINATION_CLASS': 'ecommerce.commons.pagination.LimitZeroNoResultsPagination',
+    'PAGE_SIZE': 80,
     # 'DEFAULT_FILTER_BACKENDS': (
     #     'django_filters.rest_framework.DjangoFilterBackend',
     # ),
-    'EXCEPTION_HANDLER': 'bastakotilab.commons.exception_handler.handle',
+    'EXCEPTION_HANDLER': 'ecommerce.commons.exception_handler.handle',
     # 'DEFAULT_RENDERER_CLASSES': (
     #     'rest_framework.renderers.BrowsableAPIRenderer',
     #     'rest_framework.renderers.JSONRenderer',
@@ -131,4 +135,9 @@ SWAGGER_SETTINGS = {
             'name': 'Authorization'
         }
     },
+}
+APP_HEADER_INFORMATION = {
+    'APP_NAME': 'x-levelup-app-name',
+    'DEVICE_UNIQUE_ID': 'x-levelup-unique-id',
+    'APP_VERSION': 'x-levelup-app-version',
 }

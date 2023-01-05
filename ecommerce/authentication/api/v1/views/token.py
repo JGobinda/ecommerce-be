@@ -19,7 +19,7 @@ class ObtainAuthTokenView(ObtainAuthToken):
         user = serializer.validated_data['user']
         # Adding user_agent and app specific information in AuthToken Model
         detail = dict(
-            user_agent=request.user_agent.ua_string,
+            # user_agent=request.user_agent.ua_string,
             device_id=request.headers.get(settings.APP_HEADER_INFORMATION.get('DEVICE_UNIQUE_ID')),
             app_version=request.headers.get(settings.APP_HEADER_INFORMATION.get('APP_VERSION')),
         )
