@@ -9,7 +9,7 @@ from rest_framework import serializers
 class ProductSerializer(DynamicFieldsModelSerializer):
     class Meta:
         model = Product
-        fields = ['name', 'description', 'category', 'in_stock', 'code', 'base_price', 'discount_price', 'quantity',
+        fields = ['uuid', 'name', 'description', 'category', 'in_stock', 'code', 'base_price', 'discount_price', 'quantity',
                   'sold_quantity', 'featured']
 
     def get_fields(self):
