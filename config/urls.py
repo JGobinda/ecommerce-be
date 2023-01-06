@@ -17,6 +17,7 @@ import debug_toolbar
 from django.conf import settings
 from django.contrib import admin
 from django.urls import path, include, re_path
+from django.conf.urls.static import static
 
 from ecommerce.api.v1.swagger import SwaggerSchemaView
 
@@ -31,7 +32,7 @@ if settings.DEBUG:
     urlpatterns += [
         path('api/root/', SwaggerSchemaView.as_view()),
         path('', RedirectView.as_view(url='/api/root/', permanent=False))
-    ]
+    ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
     urlpatterns += [
         re_path(r'^__debug__/', include(debug_toolbar.urls)),
