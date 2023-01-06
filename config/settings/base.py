@@ -1,8 +1,12 @@
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
-
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+PROJECT_DIR = Path(__file__).resolve().parent.parent.parent
+ROOT_DIR = os.path.dirname(PROJECT_DIR)
+BASE_DIR = os.path.join(PROJECT_DIR, 'config')
+APPS_DIR = os.path.join(PROJECT_DIR, 'ecommerce')
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -25,7 +29,10 @@ LOCAL_APPS = [
     'ecommerce.accounts',
     'ecommerce.commons',
     'ecommerce.contact',
-    'ecommerce.authentication'
+    'ecommerce.authentication',
+    'ecommerce.product',
+    'ecommerce.cart',
+    'ecommerce.wishlist'
 ]
 
 INSTALLED_APPS += THIRD_PARTY_APPS + LOCAL_APPS
@@ -41,6 +48,7 @@ MIDDLEWARE = [
     'cuser.middleware.CuserMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 
+    'ecommerce.commons.middleware.CustomUserAgentMiddleWare'
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -48,7 +56,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
+        'DIRS': [PROJECT_DIR / 'templates']
         ,
         'APP_DIRS': True,
         'OPTIONS': {
@@ -105,13 +113,18 @@ MEDIA_URL = '/media/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'ecommerce.authentication.auth.CustomKnoxTokenAuthentication',
+    ],
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
     'DEFAULT_PAGINATION_CLASS': 'ecommerce.commons.pagination.LimitZeroNoResultsPagination',
     'PAGE_SIZE': 80,
-    # 'DEFAULT_FILTER_BACKENDS': (
-    #     'django_filters.rest_framework.DjangoFilterBackend',
-    # ),
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ),
     'EXCEPTION_HANDLER': 'ecommerce.commons.exception_handler.handle',
     # 'DEFAULT_RENDERER_CLASSES': (
     #     'rest_framework.renderers.BrowsableAPIRenderer',
@@ -121,6 +134,7 @@ REST_FRAMEWORK = {
     #     'rest_framework_swagger.renderers.OpenAPIRenderer',
     # )
 }
+AUTH_USER_MODEL = 'accounts.User'
 
 LOGIN_URL = 'rest_framework:login'
 LOGOUT_URL = 'rest_framework:logout'
@@ -130,7 +144,7 @@ LOGOUT_REDIRECT_URL = '/api/root/'
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
         'api_key': {
-            'type': 'apiKey',
+            'type': 'api_key',
             'in': 'header',
             'name': 'Authorization'
         }

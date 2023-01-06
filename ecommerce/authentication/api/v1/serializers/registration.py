@@ -2,11 +2,9 @@ import re
 from django.db import transaction
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group
 from django.contrib.auth.password_validation import validate_password as dj_validate_password
 from rest_framework import serializers
 
-from ecommerce.commons.constants import USER as NORMAL_USER
 from ecommerce.commons.serializers import DynamicFieldsModelSerializer
 
 

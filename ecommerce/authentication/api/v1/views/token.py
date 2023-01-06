@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.auth import login
 from django.utils import timezone
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
@@ -33,7 +34,7 @@ class ObtainAuthTokenView(ObtainAuthToken):
             grp = groups.first().name
         else:
             grp = None
-
+        login(request, user)
         return Response(
             {
                 'token': token,
