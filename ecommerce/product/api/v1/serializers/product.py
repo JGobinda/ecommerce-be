@@ -15,7 +15,7 @@ class ProductSerializer(DynamicFieldsModelSerializer):
     def get_fields(self):
         fields = super(ProductSerializer, self).get_fields()
         view = self.context.get('view')
-        if view and view.action in ['retrieve', 'list']:
+        if view and view.action in ['retrieve', 'list', 'featured_products', 'latest_products']:
             fields['category'] = CategorySerializer(fields=['uuid', 'title'], many=True)
             fields['images'] = serializers.SerializerMethodField()
         return fields
