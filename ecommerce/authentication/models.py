@@ -1,9 +1,13 @@
 from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.utils import timezone
 from knox.models import AuthToken as KnoxAuthTokenModel, AuthTokenManager
 from knox.settings import CONSTANTS, knox_settings
 from knox import crypto
+
+from ecommerce.commons.models import UUIDBaseModel
+
 USER = get_user_model()
 
 
@@ -37,3 +41,10 @@ class KnoxAuthToken(KnoxAuthTokenModel):
             token_key__in=exclude
         ).delete()
 
+
+class UserOTPVerification(UUIDBaseModel):
+    email = models.CharField(max_length=50)
+    # this validator in otp does not work here(only works in case of ModelForm)
+    otp = models.PositiveIntegerField(validators=[MinValueValidator(100000), MaxValueValidator(999999)])
+    is_expired = models.BooleanField(default=False)
+    is_verified = models.BooleanField(default=False)
