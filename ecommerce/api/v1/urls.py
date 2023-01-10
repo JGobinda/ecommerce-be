@@ -7,4 +7,5 @@ urlpatterns = [
     path('product/', include('ecommerce.product.api.v1.urls')),
     path('wishlist/', include('ecommerce.wishlist.api.v1.urls')),
     path('order/', include('ecommerce.cart.api.v1.urls')),
+    path('user/', include('ecommerce.accounts.api.v1.urls'))
 ]

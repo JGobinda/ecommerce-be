@@ -9,8 +9,9 @@ from rest_framework import serializers
 class ProductSerializer(DynamicFieldsModelSerializer):
     class Meta:
         model = Product
-        fields = ['uuid', 'name', 'description', 'category', 'in_stock', 'code', 'base_price', 'discount_price', 'quantity',
-                  'sold_quantity', 'featured']
+        fields = ['uuid', 'name', 'description', 'category', 'in_stock', 'code', 'base_price', 'discount_price',
+                  'quantity',
+                  'sold_quantity', 'featured', 'ratings']
 
     def get_fields(self):
         fields = super(ProductSerializer, self).get_fields()
@@ -18,7 +19,25 @@ class ProductSerializer(DynamicFieldsModelSerializer):
         if view and view.action in ['retrieve', 'list', 'featured_products', 'latest_products']:
             fields['category'] = CategorySerializer(fields=['uuid', 'title'], many=True)
             fields['images'] = serializers.SerializerMethodField()
+        if view and view.action in ['update_product_rating']:
+            fields.clear()
+            fields['flag'] = serializers.BooleanField(default=True)
         return fields
+
+    def validate(self, attrs):
+        view = self.context.get('view')
+        flag = attrs.get('flag')
+        if view and view.action in ['update_product_rating']:
+            product = self.context.get('object')
+            if product.ratings >= 5 and flag:
+                raise serializers.ValidationError({
+                    'detail': 'You cannot rate a product more than 5'
+                })
+            if product.ratings <=1 and not flag:
+                raise serializers.ValidationError({
+                    'detail': 'You cannot rate a product less than 1'
+                })
+        return attrs
 
     def get_images(self, obj):
         request = self.context.get('request')

@@ -23,6 +23,7 @@ class Product(UUIDBaseModel):
     quantity = models.PositiveIntegerField(default=0)
     sold_quantity = models.PositiveIntegerField(default=0)
     featured = models.BooleanField(default=False)
+    ratings = models.PositiveIntegerField(default=1)
 
     def __str__(self):
         return self.name

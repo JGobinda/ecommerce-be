@@ -1,6 +1,6 @@
-from knox.serializers import UserSerializer
 from rest_framework import serializers
 
+from ecommerce.accounts.api.v1.serializers.accounts import UserSerializer
 from ecommerce.cart.constants import PENDING
 from ecommerce.cart.models import Order
 from ecommerce.commons.serializers import DynamicFieldsModelSerializer
@@ -19,7 +19,7 @@ class OrderSerializer(DynamicFieldsModelSerializer):
         request = self.context.get('request')
         if request and request.method.lower() in ['get']:
             fields['product'] = ProductSerializer(fields=['uuid', 'name'])
-            fields['user'] = UserSerializer()
+            fields['user'] = UserSerializer(context={'request': request})
         if request and request.method.lower() in ['post']:
             fields.pop('status')
             fields['product'] = serializers.SlugRelatedField(slug_field='uuid', queryset=Product.objects.all())
@@ -29,11 +29,17 @@ class OrderSerializer(DynamicFieldsModelSerializer):
         return fields
 
     def validate(self, attrs):
+        product = attrs.get('product')
+        requested_quantity = attrs.get('quantity')
         request = self.context.get('request')
         if request and request.method.lower() in ['post']:
             if Order.objects.filter(user=request.user, product=attrs.get('product')).exists():
                 raise serializers.ValidationError({
-                    'error': 'Order with this product already exists'
+                    'error': 'Order with this product already exists.'
+                }, code=HTTP_400_BAD_REQUEST)
+            if product.quantity <= requested_quantity:
+                raise serializers.ValidationError({
+                    'error': 'Requested quantity beyond available quantity.'
                 }, code=HTTP_400_BAD_REQUEST)
 
         return attrs

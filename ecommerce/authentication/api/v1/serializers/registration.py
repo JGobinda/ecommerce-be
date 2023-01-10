@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password as dj_validate_password
 from rest_framework import serializers
 
+from ecommerce.authentication.utils import user_account_activation_otp_to_email
 from ecommerce.commons.serializers import DynamicFieldsModelSerializer
 
 
@@ -90,8 +91,8 @@ class UserAccountRegistrationSerializer(DynamicFieldsModelSerializer):
             if getattr(settings, 'USER_TEST_MODE', False):
                 instance.is_active = True
                 instance.save()
-            instance.is_active = True
-            # else:
-            #     send_account_activation_otp_to_email(instance)
+                instance.is_active = True
+            else:
+                user_account_activation_otp_to_email(instance)
             return instance
 

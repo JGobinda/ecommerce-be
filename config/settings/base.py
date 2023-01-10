@@ -23,6 +23,8 @@ THIRD_PARTY_APPS = [
     'debug_toolbar',
     'knox',
     'django_extensions',
+    'django_q',
+    "corsheaders",
 ]
 
 LOCAL_APPS = [
@@ -40,6 +42,7 @@ INSTALLED_APPS += THIRD_PARTY_APPS + LOCAL_APPS
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -155,3 +158,5 @@ APP_HEADER_INFORMATION = {
     'DEVICE_UNIQUE_ID': 'x-levelup-unique-id',
     'APP_VERSION': 'x-levelup-app-version',
 }
+
+

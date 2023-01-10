@@ -1,10 +1,8 @@
 from rest_framework.routers import DefaultRouter
-from .views.accounts import ListView
-from django.urls import path
+from .views.accounts import UserViewSet
 ROUTER = DefaultRouter()
-# ROUTER.register('list/', ListView.as_view(), basename='list')
+ROUTER.register('', UserViewSet, basename='user')
 
 urlpatterns = [
-    path('list/', ListView.as_view(), name='list')
 ] + ROUTER.urls
 
