@@ -18,7 +18,7 @@ class OrderSerializer(DynamicFieldsModelSerializer):
         fields = super(OrderSerializer, self).get_fields()
         request = self.context.get('request')
         if request and request.method.lower() in ['get']:
-            fields['product'] = ProductSerializer(fields=['uuid', 'name'])
+            fields['product'] = ProductSerializer()
             fields['user'] = UserSerializer(context={'request': request})
         if request and request.method.lower() in ['post']:
             fields.pop('status')
@@ -46,6 +46,10 @@ class OrderSerializer(DynamicFieldsModelSerializer):
 
     def create(self, validated_data):
         request = self.context.get('request')
-        instance = Order.objects.create(user=request.user, product=validated_data.get('product'),
-                                        quantity=validated_data.get('quantity'), status=PENDING)
+        quantity = validated_data.get('quantity')
+        product = validated_data.get('product')
+        instance = Order.objects.create(user=request.user, product=product,
+                                        quantity=quantity, status=PENDING)
+        product.quantity -= quantity
+        product.save()
         return instance

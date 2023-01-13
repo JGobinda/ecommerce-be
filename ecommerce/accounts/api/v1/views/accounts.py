@@ -5,7 +5,12 @@ from ecommerce.accounts.models import User
 
 
 class UserViewSet(ModelViewSet):
-    lookup_field = 'uuid'
-    lookup_url_kwarg = 'uuid'
+    lookup_field = 'username'
+    lookup_url_kwarg = 'username'
     serializer_class = UserSerializer
     queryset = User.objects.all()
+
+    def get_object(self):
+        if self.kwargs['username'] == 'me':
+            self.kwargs['username'] = self.request.user.username
+        return super().get_object()

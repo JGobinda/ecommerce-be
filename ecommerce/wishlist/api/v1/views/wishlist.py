@@ -16,8 +16,5 @@ class WishListViewSet(ListCreateDestroyViewSetMixin):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         return Response(
-            {
-                'detail': 'Created'
-            }
+            serializer.data
         )
-

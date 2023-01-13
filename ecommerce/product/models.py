@@ -1,6 +1,7 @@
 from django.db import models
 
 # Create your models here.
+from ecommerce.accounts.models import User
 from ecommerce.commons.models import UUIDBaseModel, FileUpload
 
 
@@ -23,7 +24,6 @@ class Product(UUIDBaseModel):
     quantity = models.PositiveIntegerField(default=0)
     sold_quantity = models.PositiveIntegerField(default=0)
     featured = models.BooleanField(default=False)
-    ratings = models.PositiveIntegerField(default=1)
 
     def __str__(self):
         return self.name
@@ -35,3 +35,17 @@ class ProductImage(UUIDBaseModel):
 
     def __str__(self):
         return self.product.name
+
+
+class ProductFeature(UUIDBaseModel):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_product_features')
+    title = models.CharField(max_length=1000, default='')
+
+    def __str__(self):
+        return self.title
+
+
+class ProductRating(UUIDBaseModel):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_product_ratings')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_product_ratings')
+    ratings = models.PositiveIntegerField(default=1)

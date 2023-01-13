@@ -135,3 +135,11 @@ class ListUpdateViewSetMixin(
     GenericViewSet
 ):
     pass
+
+
+class CreateUpdateViewSetMixin(
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    GenericViewSet
+):
+    pass
