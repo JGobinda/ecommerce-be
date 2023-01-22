@@ -1,4 +1,4 @@
-from django.db.models import Sum
+from django.db.models import Sum, F, Count, Avg, Q
 
 from ecommerce.commons.api.v1.serializers.file_upload import FileUploadSerializer
 from ecommerce.commons.models import FileUpload
@@ -15,13 +15,13 @@ class ProductSerializer(DynamicFieldsModelSerializer):
         model = Product
         fields = ['uuid', 'name', 'description', 'category', 'in_stock', 'code', 'base_price', 'discount_price',
                   'quantity',
-                  'sold_quantity', 'featured']
+                  'sold_quantity', 'featured', 'total_ratings']
 
     def get_fields(self):
         fields = super(ProductSerializer, self).get_fields()
         view = self.context.get('view')
         if view and view.action in ['retrieve', 'list', 'featured_products', 'latest_products',
-                                    'top_discount_products', 'trending_products']:
+                                    'top_discount_products', 'trending_products', 'related_products']:
             fields['category'] = CategorySerializer(fields=['uuid', 'title'], many=True)
             fields['images'] = serializers.SerializerMethodField()
             fields['features'] = serializers.SerializerMethodField()
@@ -32,6 +32,11 @@ class ProductSerializer(DynamicFieldsModelSerializer):
         if view and view.action in ['update_product_rating']:
             fields.clear()
             fields['flag'] = serializers.BooleanField(default=True)
+        print(view)
+        if view and view.action in ['get_product_ratings']:
+            print("HEre")
+            fields.clear()
+            fields['overall_ratings'] = serializers.SerializerMethodField()
         return fields
 
     def get_images(self, obj):
@@ -83,6 +88,33 @@ class ProductSerializer(DynamicFieldsModelSerializer):
         except WishList.MultipleObjectsReturned:
             return False
 
+    def get_overall_ratings(self, obj):
+        product = self.context.get('product')
+        product_ratings = ProductRating.objects.filter(product=product).count()
+        product_rating_queryset = ProductRating.objects.filter(product=product).aggregate(
+            one=Count('id', filter=Q(ratings=1)),
+            two=Count('id', filter=Q(ratings=2)),
+            three=Count('id', filter=Q(ratings=3)),
+            four=Count('id', filter=Q(ratings=4)),
+            five=Count('id', filter=Q(ratings=5)),
+        )
+        if product_ratings == 0:
+            product_ratings = 1
+        data = {
+            'total': product_ratings,
+            'one': round(product_rating_queryset['one'] / product_ratings, 2)*100,
+            'two': round(product_rating_queryset['two'] / product_ratings, 2)*100,
+            'three': round(product_rating_queryset['three'] / product_ratings, 2)*100,
+            'four': round(product_rating_queryset['four'] / product_ratings, 2)*100,
+            'five': round(product_rating_queryset['five'] / product_ratings, 2)*100,
+            'one_count': product_rating_queryset['one'],
+            'two_count': product_rating_queryset['two'],
+            'three_count': product_rating_queryset['three'],
+            'four_count': product_rating_queryset['four'],
+            'five_count': product_rating_queryset['five']
+        }
+        return data
+
 
 class ProductRatingSerializer(DynamicFieldsModelSerializer):
     class Meta:
@@ -131,5 +163,20 @@ class ProductRatingSerializer(DynamicFieldsModelSerializer):
     def create(self, validated_data):
         request = self.context.get('request')
         validated_data['user'] = request.user
+        product = validated_data.get('product')
         instance = super(ProductRatingSerializer, self).create(validated_data)
+        product_ratings_object = ProductRating.objects.filter(product=product)
+        print(product_ratings_object)
+        product_ratings_count = product_ratings_object.aggregate(rating=Sum('ratings') / Count('id'))['rating']
+        product.total_ratings = product_ratings_count
+        product.save()
+        return instance
+
+    def update(self, instance, validated_data):
+        instance = super(ProductRatingSerializer, self).update(instance=instance, validated_data=validated_data)
+        product = instance.product
+        product_ratings_object = ProductRating.objects.filter(product=product)
+        product_ratings_count = product_ratings_object.aggregate(rating=Avg('ratings'))['rating']
+        product.total_ratings = product_ratings_count
+        product.save()
         return instance

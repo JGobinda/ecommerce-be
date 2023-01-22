@@ -15,6 +15,7 @@ class Category(UUIDBaseModel):
 
 class Product(UUIDBaseModel):
     name = models.CharField(max_length=500, null=True, blank=True)
+    manufacturer = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField()
     category = models.ManyToManyField(Category, related_name='category_products')
     in_stock = models.BooleanField(default=True)
@@ -23,6 +24,7 @@ class Product(UUIDBaseModel):
     discount_price = models.PositiveIntegerField(default=0)
     quantity = models.PositiveIntegerField(default=0)
     sold_quantity = models.PositiveIntegerField(default=0)
+    total_ratings = models.PositiveIntegerField(default=0)
     featured = models.BooleanField(default=False)
 
     def __str__(self):

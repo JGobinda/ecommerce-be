@@ -8,8 +8,8 @@ from ecommerce.commons.models import UUIDBaseModel
 
 class ShippingDetail(UUIDBaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_shipping_detail')
-    is_same_user = models.BooleanField(default=True)
-    email = models.EmailField(max_length=100)
+    email = models.EmailField(max_length=100, null=True, blank=True)
+    phone_number = models.CharField(max_length=14, null=True, blank=True)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     address = models.CharField(max_length=255)

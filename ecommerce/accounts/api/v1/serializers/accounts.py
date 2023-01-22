@@ -16,6 +16,10 @@ class UserSerializer(DynamicFieldsModelSerializer):
         request = self.context.get('request')
         if request and request.method.lower() == 'get':
             fields['profile_picture'] = serializers.URLField(source='profile_picture_thumb')
+        if request and request.method.lower() == 'patch':
+            fields.pop('groups')
+            fields.pop('is_active')
+            fields.pop('receive_offer')
         return fields
 
     @staticmethod
@@ -34,10 +38,14 @@ class UserSerializer(DynamicFieldsModelSerializer):
             raise serializers.ValidationError("Please enter correct phone number!")
         return phone_number
 
-    @staticmethod
-    def validate_dob(dob):
-        from datetime import date, timedelta
-        dob_difference = date.today() - dob
-        if dob_difference < timedelta(days=1825):
-            raise serializers.ValidationError("Your age must be minimum 5 years or more!")
-        return dob
+
+class ProfilePictureUpdateSerializer(DynamicFieldsModelSerializer):
+    class Meta:
+        model = User
+        fields = ('profile_picture',)
+        extra_kwargs = {
+            'profile_picture': {
+                'required': True,
+                'allow_null': False,
+            }
+        }
