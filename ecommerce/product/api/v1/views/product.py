@@ -1,17 +1,19 @@
-from django.db.models import Sum, F, Count
+from django.db.models import Sum, F, Count, Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from ecommerce.cart.constants import DELIVERED
+# from ecommerce.cart.constants import DELIVERED
+from ecommerce.cart.constants import PENDING, IN_PROCESS, ON_THE_WAY
 from ecommerce.cart.models import Order
 from ecommerce.commons.mixins.viewsets import ListRetrieveViewSetMixin, CreateUpdateViewSetMixin, \
     ListCreateUpdateRetrieveViewSetMixin
 from ecommerce.product.api.v1.serializers.category import CategorySerializer
 from ecommerce.product.api.v1.serializers.product import ProductSerializer, ProductRatingSerializer
 from ecommerce.product.models import Product, ProductRating, Category
+from ecommerce.wishlist.models import WishList
 
 
 class ProductViewSet(ListRetrieveViewSetMixin):
@@ -20,27 +22,32 @@ class ProductViewSet(ListRetrieveViewSetMixin):
     serializer_class = ProductSerializer
     filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
     filterset_fields = ['category__title', 'name']
-    ordering_fields = ['name']
+    ordering_fields = ['name', 'quantity', 'base_price']
     search_fields = ['name', 'category__title']
 
     def get_queryset(self):
         if self.request.user.is_authenticated:
             if self.action in ['featured_products']:
                 return Product.objects.filter(in_stock=True, featured=True).exclude(
-                    uuid__in=Order.objects.filter(user=self.request.user).values_list('product__uuid', flat=True))[:15]
+                    uuid__in=Order.objects.filter(user=self.request.user, status__in=[PENDING, IN_PROCESS, ON_THE_WAY]).values_list(
+                        'product__uuid', flat=True))[:15]
 
             if self.action in ['latest_products']:
                 return Product.objects.filter(in_stock=True).exclude(
-                    uuid__in=Order.objects.filter(user=self.request.user).values_list('product__uuid',
-                                                                                      flat=True)).order_by(
+                    Q(featured=True) | Q(uuid__in=Order.objects.filter(user=self.request.user, status__in=[PENDING, IN_PROCESS, ON_THE_WAY]).values_list(
+                        'product__uuid',
+                        flat=True))
+                    ).order_by(
                     '-created_at', '-updated_at')[:15]
             if self.action in ['trending_products']:
                 return Product.objects.filter(in_stock=True).annotate(
                     purchases=Count('product_carts')).order_by(
                     '-purchases').exclude(
-                    uuid__in=Order.objects.filter(user=self.request.user).values_list('product__uuid', flat=True))[:8]
+                    uuid__in=Order.objects.filter(user=self.request.user, status__in=[PENDING, IN_PROCESS, ON_THE_WAY]).values_list(
+                        'product__uuid', flat=True))[:8]
             return Product.objects.filter(in_stock=True).exclude(
-                uuid__in=Order.objects.filter(user=self.request.user).values_list('uuid', flat=True))
+                uuid__in=Order.objects.filter(user=self.request.user, status__in=[PENDING, IN_PROCESS, ON_THE_WAY]).values_list(
+                    'product__uuid', flat=True))
         if self.action in ['top_discount_products']:
             return Product.objects.filter(in_stock=True).annotate(discount_per=Sum(
                 F('discount_price') * 100 / F('base_price')
@@ -139,7 +146,18 @@ class ProductViewSet(ListRetrieveViewSetMixin):
             serializer_class=ProductSerializer)
     def get_product_ratings(self, request, *args, **kwargs):
         product = self.get_object()
-        serializer = self.get_serializer(product, context={'product': product, 'view':self})
+        serializer = self.get_serializer(product, context={'product': product, 'view': self})
+        return Response(serializer.data)
+
+    @action(methods=['get', ], detail=False, url_name='wished-products', url_path='wished-products',
+            serializer_class=ProductSerializer)
+    def get_wished_products(self, request, *args, **kwargs):
+        product_queryset = Product.objects.filter(
+            uuid__in=WishList.objects.filter(user=request.user).values_list('product__uuid', flat=True)).exclude(
+            uuid__in=Order.objects.filter(user=self.request.user, status__in=[PENDING, IN_PROCESS]).values_list(
+                        'product__uuid', flat=True)
+        )
+        serializer = self.get_serializer(product_queryset, many=True)
         return Response(serializer.data)
 
 

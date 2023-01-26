@@ -33,7 +33,7 @@ def send_password_reset_email(user):
     otp_request = UserOTPVerification.objects.create(email=user.email, otp=otp)
     async_task(
         'django.core.mail.send_mail',
-        "This is subject",
+        "Password reset",
         f"Hello user, the otp for account password reset is {otp}. OTP expires in a day.",
         HOST_EMAIL,
         [user.email],

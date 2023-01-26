@@ -34,7 +34,8 @@ LOCAL_APPS = [
     'ecommerce.authentication',
     'ecommerce.product',
     'ecommerce.cart',
-    'ecommerce.wishlist'
+    'ecommerce.wishlist',
+    'ecommerce.shipping'
 ]
 
 INSTALLED_APPS += THIRD_PARTY_APPS + LOCAL_APPS

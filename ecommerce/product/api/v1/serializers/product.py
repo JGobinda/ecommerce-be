@@ -21,7 +21,8 @@ class ProductSerializer(DynamicFieldsModelSerializer):
         fields = super(ProductSerializer, self).get_fields()
         view = self.context.get('view')
         if view and view.action in ['retrieve', 'list', 'featured_products', 'latest_products',
-                                    'top_discount_products', 'trending_products', 'related_products']:
+                                    'top_discount_products', 'trending_products', 'related_products', 'recent_orders',
+                                    'get_wished_products']:
             fields['category'] = CategorySerializer(fields=['uuid', 'title'], many=True)
             fields['images'] = serializers.SerializerMethodField()
             fields['features'] = serializers.SerializerMethodField()
@@ -102,11 +103,11 @@ class ProductSerializer(DynamicFieldsModelSerializer):
             product_ratings = 1
         data = {
             'total': product_ratings,
-            'one': round(product_rating_queryset['one'] / product_ratings, 2)*100,
-            'two': round(product_rating_queryset['two'] / product_ratings, 2)*100,
-            'three': round(product_rating_queryset['three'] / product_ratings, 2)*100,
-            'four': round(product_rating_queryset['four'] / product_ratings, 2)*100,
-            'five': round(product_rating_queryset['five'] / product_ratings, 2)*100,
+            'one': round(product_rating_queryset['one'] / product_ratings, 2) * 100,
+            'two': round(product_rating_queryset['two'] / product_ratings, 2) * 100,
+            'three': round(product_rating_queryset['three'] / product_ratings, 2) * 100,
+            'four': round(product_rating_queryset['four'] / product_ratings, 2) * 100,
+            'five': round(product_rating_queryset['five'] / product_ratings, 2) * 100,
             'one_count': product_rating_queryset['one'],
             'two_count': product_rating_queryset['two'],
             'three_count': product_rating_queryset['three'],

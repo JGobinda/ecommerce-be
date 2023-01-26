@@ -2,7 +2,7 @@ from django.db import models
 
 # Create your models here.
 from ecommerce.accounts.models import User
-from ecommerce.cart.constants import STATUS_CHOICES, PENDING, PAYMENT_CHOICES
+from ecommerce.cart.constants import STATUS_CHOICES, PENDING, PAYMENT_CHOICES, KHALTI
 from ecommerce.commons.models import UUIDBaseModel
 from ecommerce.product.models import Product
 
@@ -18,3 +18,10 @@ class Order(UUIDBaseModel):
 
     def __str__(self):
         return f'{self.user.name} --> {self.product.name} --> {self.product.quantity}'
+
+
+# class Payment(UUIDBaseModel):
+#     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="order_payments")
+#     amount = models.PositiveIntegerField()
+#     payment_type = models.CharField(choices=PAYMENT_CHOICES, max_length=15, default=KHALTI)
+

@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from ecommerce.accounts.models import User
 from ecommerce.commons.serializers import DynamicFieldsModelSerializer
+from django.contrib.auth.password_validation import validate_password as dj_validate_password
 
 
 class UserSerializer(DynamicFieldsModelSerializer):
@@ -49,3 +50,36 @@ class ProfilePictureUpdateSerializer(DynamicFieldsModelSerializer):
                 'allow_null': False,
             }
         }
+
+
+class PasswordChangeSerializer(serializers.Serializer):
+    old_password = serializers.CharField(max_length=128, write_only=True,
+                                         style={'input_type': 'password'})
+    password = serializers.CharField(max_length=128, write_only=True,
+                                     style={'input_type': 'password'})
+    repeat_password = serializers.CharField(max_length=128, write_only=True,
+                                            style={'input_type': 'password'})
+
+    @staticmethod
+    def validate_password(password):
+        dj_validate_password(password)
+        return password
+
+    def validate(self, attrs):
+        user = self.context['user']
+        if not user.is_active:
+            raise serializers.ValidationError('User not active')
+
+        if attrs['password'] != attrs['repeat_password']:
+            raise serializers.ValidationError('Passwords did not match')
+
+        if not user.check_password(attrs['old_password']):
+            raise serializers.ValidationError({'old_password': ['Old password did not match']})
+        return attrs
+
+    def create(self, validated_data):
+        user = self.context['user']
+        user.set_password(validated_data.get('password'))
+        user._send_password_change_email = True
+        user.save()
+        return object()
