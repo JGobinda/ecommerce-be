@@ -89,8 +89,10 @@ class User(TimeStampModel, AbstractBaseUser, PermissionsMixin):
 
     @property
     def profile_picture_thumb(self):
+        from django.conf import settings
+        from urllib.parse import urljoin
         if self.profile_picture:
-            return self.profile_picture.url
+            return urljoin(settings.BACKEND_URL, self.profile_picture.url)
 
         from django.templatetags.static import static
         return static('user/images/default_user.jpg')
