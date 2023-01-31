@@ -33,9 +33,7 @@ class ProductSerializer(DynamicFieldsModelSerializer):
         if view and view.action in ['update_product_rating']:
             fields.clear()
             fields['flag'] = serializers.BooleanField(default=True)
-        print(view)
         if view and view.action in ['get_product_ratings']:
-            print("HEre")
             fields.clear()
             fields['overall_ratings'] = serializers.SerializerMethodField()
         return fields
@@ -167,7 +165,6 @@ class ProductRatingSerializer(DynamicFieldsModelSerializer):
         product = validated_data.get('product')
         instance = super(ProductRatingSerializer, self).create(validated_data)
         product_ratings_object = ProductRating.objects.filter(product=product)
-        print(product_ratings_object)
         product_ratings_count = product_ratings_object.aggregate(rating=Sum('ratings') / Count('id'))['rating']
         product.total_ratings = product_ratings_count
         product.save()

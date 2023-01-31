@@ -17,7 +17,7 @@ def send_order_placed_mail(user, shipping_mail=""):
         "Payment Method Saved",
         subject,
         HOST_EMAIL,
-        [recipients],
+        recipients,
         fail_silently=True
     )
     return True

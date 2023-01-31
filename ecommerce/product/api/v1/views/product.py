@@ -29,24 +29,29 @@ class ProductViewSet(ListRetrieveViewSetMixin):
         if self.request.user.is_authenticated:
             if self.action in ['featured_products']:
                 return Product.objects.filter(in_stock=True, featured=True).exclude(
-                    uuid__in=Order.objects.filter(user=self.request.user, status__in=[PENDING, IN_PROCESS, ON_THE_WAY]).values_list(
+                    uuid__in=Order.objects.filter(user=self.request.user,
+                                                  status__in=[PENDING, IN_PROCESS, ON_THE_WAY]).values_list(
                         'product__uuid', flat=True))[:15]
 
             if self.action in ['latest_products']:
                 return Product.objects.filter(in_stock=True).exclude(
-                    Q(featured=True) | Q(uuid__in=Order.objects.filter(user=self.request.user, status__in=[PENDING, IN_PROCESS, ON_THE_WAY]).values_list(
+                    Q(featured=True) | Q(uuid__in=Order.objects.filter(user=self.request.user,
+                                                                       status__in=[PENDING, IN_PROCESS,
+                                                                                   ON_THE_WAY]).values_list(
                         'product__uuid',
                         flat=True))
-                    ).order_by(
+                ).order_by(
                     '-created_at', '-updated_at')[:15]
             if self.action in ['trending_products']:
-                return Product.objects.filter(in_stock=True).annotate(
-                    purchases=Count('product_carts')).order_by(
-                    '-purchases').exclude(
-                    uuid__in=Order.objects.filter(user=self.request.user, status__in=[PENDING, IN_PROCESS, ON_THE_WAY]).values_list(
-                        'product__uuid', flat=True))[:8]
+                return Product.objects.filter(in_stock=True, uuid__in=Order.objects.all().values_list(
+                    'product__uuid',
+                    flat=True)).exclude(uuid__in=Order.objects.filter(user=self.request.user).values_list(
+                    'product__uuid',
+                    flat=True)).annotate(
+                    purchases=Count('product_carts')).order_by('-purchases')[:8]
             return Product.objects.filter(in_stock=True).exclude(
-                uuid__in=Order.objects.filter(user=self.request.user, status__in=[PENDING, IN_PROCESS, ON_THE_WAY]).values_list(
+                uuid__in=Order.objects.filter(user=self.request.user,
+                                              status__in=[PENDING, IN_PROCESS, ON_THE_WAY]).values_list(
                     'product__uuid', flat=True))
         if self.action in ['top_discount_products']:
             return Product.objects.filter(in_stock=True).annotate(discount_per=Sum(
@@ -60,7 +65,7 @@ class ProductViewSet(ListRetrieveViewSetMixin):
 
     def get_permissions(self):
         if self.action in ['list', 'retrieve', 'featured_products', 'latest_products', 'top_discount_products',
-                           'trending_products', 'top_categories', 'related_products']:
+                           'trending_products', 'top_categories', 'related_products', 'get_product_ratings']:
             return [AllowAny()]
         return [IsAuthenticated()]
 
@@ -88,12 +93,12 @@ class ProductViewSet(ListRetrieveViewSetMixin):
 
     @action(detail=False, methods=['get'], url_name='trending-products', url_path='trending-products')
     def trending_products(self, request, *args, **kwargs):
-        latest_products_queryset = self.get_queryset()
-        page = self.paginate_queryset(latest_products_queryset)
+        trending_product_queryset = self.get_queryset()
+        page = self.paginate_queryset(trending_product_queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
-        serializer = self.get_serializer(latest_products_queryset, many=True,
+        serializer = self.get_serializer(trending_product_queryset, many=True,
                                          context={
                                              'view': self,
                                              'request': self.request
@@ -134,7 +139,7 @@ class ProductViewSet(ListRetrieveViewSetMixin):
                                                            category__uuid__in=product.category.all().values_list('uuid',
                                                                                                                  flat=True))[
                                     :4]
-        serializer = self.get_serializer(related_products_queryset, many=True,
+        serializer = self.get_serializer(list(set(related_products_queryset)), many=True,
                                          context={
                                              'view': self,
                                              'request': self.request
@@ -155,7 +160,7 @@ class ProductViewSet(ListRetrieveViewSetMixin):
         product_queryset = Product.objects.filter(
             uuid__in=WishList.objects.filter(user=request.user).values_list('product__uuid', flat=True)).exclude(
             uuid__in=Order.objects.filter(user=self.request.user, status__in=[PENDING, IN_PROCESS]).values_list(
-                        'product__uuid', flat=True)
+                'product__uuid', flat=True)
         )
         serializer = self.get_serializer(product_queryset, many=True)
         return Response(serializer.data)

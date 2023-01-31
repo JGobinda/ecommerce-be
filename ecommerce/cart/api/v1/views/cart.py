@@ -15,8 +15,12 @@ from ecommerce.shipping.models import ShippingDetail
 class OrderViewSet(ModelViewSet):
     lookup_field = 'uuid'
     lookup_url_kwarg = 'uuid'
-    queryset = Order.objects.filter(status__in=[PENDING, IN_PROCESS]).exclude(status__in=[ON_THE_WAY])
     serializer_class = OrderSerializer
+
+    def get_queryset(self):
+        if self.action in ['destroy']:
+            return Order.objects.all()
+        return Order.objects.filter(user=self.request.user, status__in=[PENDING, IN_PROCESS]).exclude(status__in=[ON_THE_WAY])
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -72,7 +76,7 @@ class OrderViewSet(ModelViewSet):
         payment_method = self.request.query_params.get('method')
         if payment_method == 'KHALTI':
             Order.objects.filter(user=request.user, status=PENDING).update(payment_method='KHALTI')
-            Order.objects.filter(user=request.user, status=PENDING).update(status=ON_THE_WAY)
+            # Order.objects.filter(user=request.user, status=PENDING).update(status=ON_THE_WAY)
         if payment_method == 'CASH_ON_DELIVERY':
             Order.objects.filter(user=request.user, status=PENDING).update(payment_method='CASH_ON_DELIVERY')
             Order.objects.filter(user=request.user, status=PENDING).update(status=ON_THE_WAY)
@@ -93,7 +97,6 @@ class OrderViewSet(ModelViewSet):
         headers = {
             "Authorization": f"Key {KHALTI_TEST_SECRET_KEY}"
         }
-        print(total_price)
         import requests
         response = requests.post(KHALTI_VERIFICATION_URL, {"token": token, "amount": total_price}, headers=headers)
         if response.status_code != 200:
@@ -122,7 +125,6 @@ class OrderViewSet(ModelViewSet):
         order_queryset = Order.objects.filter(user=self.request.user, status__in=[ON_THE_WAY, IN_PROCESS])
         if order_queryset:
             payment_type = order_queryset.latest('created_at', 'updated_at').payment_method
-            # print("HERE: ", payment_type)
             if payment_type == "KHALTI":
                 return Response({
                     'type': KHALTI

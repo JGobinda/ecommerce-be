@@ -9,7 +9,7 @@ from ecommerce.product.api.v1.serializers.product import ProductSerializer
 from ecommerce.product.models import Product
 from rest_framework.status import HTTP_400_BAD_REQUEST
 
-from ecommerce.shipping.models import ShippingOrder
+from ecommerce.shipping.models import ShippingOrder, ShippingDetail
 
 
 class OrderSerializer(DynamicFieldsModelSerializer):
@@ -54,7 +54,6 @@ class OrderSerializer(DynamicFieldsModelSerializer):
         if request and request.method.lower() in ['patch']:
             order = self.context.get("object")
             ordered_product = order.product
-            print(ordered_product.quantity, order.quantity, requested_quantity)
             if (ordered_product.quantity + order.quantity) < requested_quantity:
                 raise serializers.ValidationError("stock quantity less than available quantity")
             ordered_product.save()
@@ -70,11 +69,12 @@ class OrderSerializer(DynamicFieldsModelSerializer):
             #     })
             return attrs
         if request and request.method.lower() in ['post']:
-            if Order.objects.filter(user=request.user, product=attrs.get('product'), status__in=[ON_THE_WAY]).exists():
+            if Order.objects.filter(user=request.user, product=attrs.get('product'),
+                                    status__in=[PENDING, IN_PROCESS, ON_THE_WAY]).exists():
                 raise serializers.ValidationError({
                     'error': 'Order with this product already exists.'
                 }, code=HTTP_400_BAD_REQUEST)
-            if product.quantity <= requested_quantity:
+            if product.quantity < requested_quantity:
                 raise serializers.ValidationError({
                     'error': 'Requested quantity beyond available quantity.'
                 }, code=HTTP_400_BAD_REQUEST)
@@ -84,7 +84,6 @@ class OrderSerializer(DynamicFieldsModelSerializer):
         request = self.context.get('request')
         quantity = validated_data.get('quantity')
         product = validated_data.get('product')
-        # print(product.quantity, quantity)
         total_price = quantity * (product.base_price - product.discount_price)
         instance = Order.objects.create(user=request.user, product=product,
                                         quantity=quantity, status=PENDING, total_price=total_price)
@@ -103,9 +102,7 @@ class OrderSerializer(DynamicFieldsModelSerializer):
 
     def get_has_previous_shipping_details(self, obj):
         request = self.context.get('request')
-        return ShippingOrder.objects.filter(
-            order__uuid__in=Order.objects.filter(user=request.user, status=PENDING).values_list('uuid',
-                                                                                                flat=True)).exists()
+        return ShippingDetail.objects.filter(user=request.user).exists()
 
     def get_updated_at(self, obj):
         return obj.updated_at.date()
