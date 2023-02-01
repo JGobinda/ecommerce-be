@@ -1,5 +1,6 @@
 from ecommerce.cart.constants import PENDING, IN_PROCESS
 from ecommerce.cart.models import Order
+from ecommerce.commons.api.v1.serializers.file_upload import FileUploadSerializer
 from ecommerce.commons.serializers import DynamicFieldsModelSerializer
 from ecommerce.product.models import Category
 from rest_framework import serializers
@@ -8,13 +9,14 @@ from rest_framework import serializers
 class CategorySerializer(DynamicFieldsModelSerializer):
     class Meta:
         model = Category
-        fields = ['uuid', 'title', 'description']
+        fields = ['uuid', 'title', 'description', 'image']
 
     def get_fields(self):
         fields = super(CategorySerializer, self).get_fields()
         request = self.context.get('request')
         if request and request.method.lower() in ['get']:
             fields['products_count'] = serializers.SerializerMethodField()
+            fields['image'] = FileUploadSerializer()
         return fields
 
     def get_products_count(self, obj):
