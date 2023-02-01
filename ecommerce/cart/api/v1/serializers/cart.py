@@ -70,7 +70,7 @@ class OrderSerializer(DynamicFieldsModelSerializer):
             return attrs
         if request and request.method.lower() in ['post']:
             if Order.objects.filter(user=request.user, product=attrs.get('product'),
-                                    status__in=[PENDING, IN_PROCESS, ON_THE_WAY]).exists():
+                                    status__in=[PENDING, IN_PROCESS]).exists():
                 raise serializers.ValidationError({
                     'error': 'Order with this product already exists.'
                 }, code=HTTP_400_BAD_REQUEST)

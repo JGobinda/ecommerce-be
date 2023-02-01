@@ -8,6 +8,8 @@ from ecommerce.commons.models import UUIDBaseModel, FileUpload
 class Category(UUIDBaseModel):
     title = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
+    image = models.ForeignKey(FileUpload, on_delete=models.CASCADE, related_name='image_category', null=True,
+                              blank=True)
 
     def __str__(self):
         return self.title

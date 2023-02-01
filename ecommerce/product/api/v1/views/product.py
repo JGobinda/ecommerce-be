@@ -30,14 +30,14 @@ class ProductViewSet(ListRetrieveViewSetMixin):
             if self.action in ['featured_products']:
                 return Product.objects.filter(in_stock=True, featured=True).exclude(
                     uuid__in=Order.objects.filter(user=self.request.user,
-                                                  status__in=[PENDING, IN_PROCESS, ON_THE_WAY]).values_list(
+                                                  status__in=[PENDING, IN_PROCESS]).values_list(
                         'product__uuid', flat=True))[:15]
 
             if self.action in ['latest_products']:
                 return Product.objects.filter(in_stock=True).exclude(
                     Q(featured=True) | Q(uuid__in=Order.objects.filter(user=self.request.user,
-                                                                       status__in=[PENDING, IN_PROCESS,
-                                                                                   ON_THE_WAY]).values_list(
+                                                                       status__in=[PENDING, IN_PROCESS
+                                                                                ]).values_list(
                         'product__uuid',
                         flat=True))
                 ).order_by(
@@ -51,7 +51,7 @@ class ProductViewSet(ListRetrieveViewSetMixin):
                     purchases=Count('product_carts')).order_by('-purchases')[:8]
             return Product.objects.filter(in_stock=True).exclude(
                 uuid__in=Order.objects.filter(user=self.request.user,
-                                              status__in=[PENDING, IN_PROCESS, ON_THE_WAY]).values_list(
+                                              status__in=[PENDING, IN_PROCESS]).values_list(
                     'product__uuid', flat=True))
         if self.action in ['top_discount_products']:
             return Product.objects.filter(in_stock=True).annotate(discount_per=Sum(
