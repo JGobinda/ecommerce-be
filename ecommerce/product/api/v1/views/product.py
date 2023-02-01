@@ -108,7 +108,7 @@ class ProductViewSet(ListRetrieveViewSetMixin):
 
     @action(methods=['get'], detail=False, url_name='top-discount-products', url_path='top-discount-products')
     def top_discount_products(self, request, *args, **kwargs):
-        top_discount_products_queryset = self.get_queryset()
+        top_discount_products_queryset = self.get_queryset()[:5]
         serializer = self.get_serializer(top_discount_products_queryset, many=True,
                                          context={
                                              'view': self,
