@@ -56,7 +56,7 @@ class ProductViewSet(ListRetrieveViewSetMixin):
         if self.action in ['top_discount_products']:
             return Product.objects.filter(in_stock=True).annotate(discount_per=Sum(
                 F('discount_price') * 100 / F('base_price')
-            )).filter(discount_per__gte=5).order_by('-discount_per')[:5]
+            )).filter(discount_per__gte=10).order_by('-discount_per')[:5]
         if self.action in ['trending_products']:
             return Product.objects.filter(in_stock=True).annotate(
                 purchases=Count('product_carts')).order_by(
