@@ -41,7 +41,7 @@ class ProductViewSet(ListRetrieveViewSetMixin):
                         'product__uuid',
                         flat=True))
                 ).order_by(
-                    '-created_at', '-updated_at')[:15]
+                    '-created_at', '-updated_at')[:12]
             if self.action in ['trending_products']:
                 return Product.objects.filter(in_stock=True, uuid__in=Order.objects.all().values_list(
                     'product__uuid',
